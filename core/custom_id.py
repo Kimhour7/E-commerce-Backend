@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from api.user.models import TBL_ID_COUNTER
+from api.master_data.id_config.models import TBL_ID_COUNTER
 
 def generate_prefixed_id(db: Session, model, prefix: str) -> str:
     """
@@ -30,3 +30,10 @@ def generate_prefixed_id(db: Session, model, prefix: str) -> str:
     new_sequence = str(counter.sequence).zfill(7)  # 7 digits → PRO0000001
 
     return f"{prefix}{new_sequence}"
+
+class PrefixId:
+    Country = "CNT"
+    Province= "PRV"
+    Company = "COM"
+    Branch = "BRA"
+    User   = "USR"

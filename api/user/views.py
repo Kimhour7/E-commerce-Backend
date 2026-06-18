@@ -8,7 +8,7 @@ import uuid
 from fastapi import Depends, HTTPException, status, Form
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from api.user.models import TBL_USER_OTP, TBL_USER
+from api.user.models import TBL_USER
 from api.user.schemas import (
     AdminCreateUserRequest,
     AdminUpdateUserRequest,
@@ -31,8 +31,8 @@ from core.securerity import (
     verify_password,
     User,
 )
-from core.permission import AdminPermission, AllAuthenticatedPermission
-from main import app
+from core.permission import AdminPermission
+from main import website
 import aiosmtplib
 from aiosmtplib import SMTPException, SMTPAuthenticationError
 
@@ -66,7 +66,7 @@ def _user_to_response(user: TBL_USER) -> dict:
 #  PUBLIC ENDPOINTS (no auth)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@app.post(
+@website.post(
     "/register",
     response_model=MessageResponse,
     status_code=201,
@@ -112,7 +112,7 @@ def register(
     return {"message": f"User '{payload.username}' registered successfully."}
 
 
-@app.post(
+@website.post(
     "/login",
     response_model=LoginResponse,
     summary="Login with username & password",
@@ -123,7 +123,9 @@ def login(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
-    user = db.query(TBL_USER).filter(TBL_USER.username == username).first()
+    user = db.query(TBL_USER).filter(
+        TBL_USER.username == username
+    ).first()
 
     if not user or not verify_password(password, user.password):
         raise HTTPException(
@@ -134,16 +136,16 @@ def login(
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your account has been deactivated. Please contact an administrator.",
+            detail="Your account has been deactivated.",
         )
 
-    access_token  = create_access_token({"sub": user.username})
+    access_token = create_access_token({"sub": user.username})
     refresh_token = create_refresh_token({"sub": user.username})
 
     return LoginResponse(
-        access_token  = access_token,
-        refresh_token = refresh_token,
-        token_type    = "bearer",
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
     )
 
 
@@ -223,7 +225,7 @@ async def _send_otp_email(to_email: str, otp: str) -> None:
             detail="Failed to send OTP email. Check SMTP settings.",
         )
 
-@app.post(
+@website.post(
     "/forgot-password",
     response_model=MessageResponse,
     summary="Send OTP to email for password reset",
@@ -258,7 +260,7 @@ async def forgot_password(
     return {"message": "If this email is registered, an OTP has been sent."}
 
 
-@app.post(
+@website.post(
     "/reset-password",
     response_model=MessageResponse,
     summary="Verify OTP and set new password",
@@ -310,7 +312,7 @@ async def reset_password(
 #  AUTHENTICATED ENDPOINTS (any logged-in user)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@app.get(
+@website.get(
     "/me",
     response_model=UserResponse,
     summary="Get current logged-in user profile",
@@ -320,7 +322,7 @@ async def get_me(current_user = Depends(get_current_user)):
     return _user_to_response(current_user)
 
 
-@app.put(
+@website.put(
     "/me",
     response_model=MessageResponse,
     summary="Update own profile (name, email, phone only)",
@@ -357,7 +359,7 @@ async def update_me(
     return {"message": "Profile updated successfully"}
 
 
-@app.put(
+@website.put(
     "/me/change-password",
     response_model=MessageResponse,
     summary="Change own password",
@@ -385,7 +387,7 @@ async def change_password(
 #  ADMIN ENDPOINTS (admin / superuser only)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@app.get(
+@website.get(
     "/admin/users",
     summary="List all users (paginated)",
     tags=["Admin - User Management"],
@@ -435,7 +437,7 @@ async def admin_list_users(
     }
 
 
-@app.get(
+@website.get(
     "/admin/users/{user_id}",
     response_model=UserResponse,
     summary="Get a user by ID",
@@ -452,7 +454,7 @@ async def admin_get_user(
     return _user_to_response(user)
 
 
-@app.post(
+@website.post(
     "/admin/users",
     response_model=UserResponse,
     status_code=201,
@@ -510,7 +512,7 @@ async def admin_create_user(
     return _user_to_response(new_user)
 
 
-@app.put(
+@website.put(
     "/admin/users/{user_id}",
     response_model=MessageResponse,
     summary="Update a user (admin can change role, active status)",
@@ -568,7 +570,7 @@ async def admin_update_user(
     return {"message": "User updated successfully"}
 
 
-@app.delete(
+@website.delete(
     "/admin/users/{user_id}",
     response_model=MessageResponse,
     summary="Delete a user",

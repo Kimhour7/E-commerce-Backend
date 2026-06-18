@@ -1,13 +1,16 @@
 import os
+import sys
 import importlib
 from core.db import Base, engine
 from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
+from core.custom_id import PrefixId
 
 def import_models(base_path: str, sub_path: str = "api"):
     """
     Dynamically import all models.py files from the api modules.
     """
+    sys.path.insert(0, base_path)
     for root, _, files in os.walk(os.path.join(base_path, sub_path)):
         for file in files:
             if file == "models.py":
@@ -23,8 +26,16 @@ def create_tables():
     """
     Create all tables defined in the models.
     """
-    # Import all models
-    import_models(os.getcwd())  # Adjust the base path if running from another location
+    # Import all models relative to this script's directory
+    base_path = os.path.abspath(os.path.dirname(__file__))
+    import_models(base_path)
+
+    # Ensure branch models are explicitly imported if dynamic import misses them
+    try:
+        importlib.import_module('api.website.branch.models')
+        print('Explicitly imported api.website.branch.models')
+    except ImportError as e:
+        print(f'Error explicitly importing branch model: {e}')
     
     # Verify the connection to the database
     try:
@@ -42,6 +53,8 @@ def create_tables():
         print("No tables found to create.")
     else:
         print(f"Tables to be created: {Base.metadata.tables.keys()}")
+
+    print(f"tbl_branch loaded in metadata: {'tbl_branch' in Base.metadata.tables}")
     
     # Check if tables exist in the public schema
     inspector = inspect(engine)
@@ -67,13 +80,13 @@ def initialize_counters():
     Initialize ID counter table with prefixes if not already present.
     """
     from sqlalchemy.orm import sessionmaker
-    from api.user.models import TBL_ID_COUNTER
+    from api.master_data.id_config.models import TBL_ID_COUNTER
     
     Session = sessionmaker(bind=engine)
     session = Session()
     
     try:
-        prefixes = ["PRO", "CAT", "BRA", "COM", "USR", "CART", "ITEM", "COM", "PRO-TAG", "SUB-CAT"]  # Add all your prefixes here
+        prefixes = ["PRO", "CAT", "CART", "ITEM", "PRO-TAG", "SUB-CAT", PrefixId.Country, PrefixId.Province, PrefixId.Company, PrefixId.Branch, PrefixId.User]  # Add Prefixes ID
         
         for prefix in prefixes:
             # Check if this prefix already exists

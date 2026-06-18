@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String
-from core.db import AuditTenantMixin, Base
+from core.db import CoreAuditModel, Base
 
-class TBL_SUB_CATEGORY(AuditTenantMixin, Base):
+class TBL_SUB_CATEGORY(CoreAuditModel, Base):
     __tablename__ = "tbl_sub_category"
     
     id           = Column(String, primary_key=True, unique=True, index=True)

@@ -1,8 +1,27 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+from fastapi.requests import Request
+from fastapi.responses import Response
 import os
-# For using in every module
+
+from core.logger import log_request, log_response
+
 app = FastAPI()
+website = app
+
+
+@app.middleware("http")
+async def log_middleware(request: Request, call_next):
+    body = None
+    try:
+        body = await request.json()
+    except Exception:
+        body = None
+
+    log_request(request.method, request.url.path, dict(request.query_params), body)
+    response: Response = await call_next(request)
+    log_response(request.method, request.url.path, response.status_code)
+    return response
 
 @app.get("/custom/docs", include_in_schema=False)
 async def custom_docs():
@@ -11,7 +30,7 @@ async def custom_docs():
             return HTMLResponse(f.read())
     pass
 
-@app.get('/', response_class=HTMLResponse)
+@website.get('/', response_class=HTMLResponse)
 async def home_page():
     html_path = "templates/home.html"
     

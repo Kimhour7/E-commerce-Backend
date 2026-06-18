@@ -5,10 +5,10 @@ from fastapi.staticfiles import StaticFiles
 
 from config import configs
 from core.securerity import User
-from main import app
+from main import website
 
 # ── Static mount (once for the whole app) ────────────────────────────────────
-app.mount("/static", StaticFiles(directory="static"), name="static")
+website.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

@@ -9,11 +9,11 @@ from core.db import get_db
 from core.permission import AdminPermission
 from core.photo_maker import build_photo_url, get_username, save_file
 from core.securerity import User
-from main import app
+from main import website
 
 UPLOAD_DIR = "static/uploads/sub-categories"
 
-@app.post("/sub-category-create", tags=["Sub Category"])
+@website.post("/sub-category-create", tags=["Sub Category"])
 def sub_category_create(
     category_id : str                   = Form(...),
     name        : str                   = Form(...),

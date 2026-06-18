@@ -10,11 +10,11 @@ from core.permission import *
 from core.photo_maker import build_photo_url, delete_file, get_username, save_file
 from core.securerity import User, get_current_user
 from core.custom_id import generate_prefixed_id
-from main import app
+from main import website
 
 UPLOAD_DIR = "static/uploads/categories"
 
-@app.get("/get-category", tags=["Category"])
+@website.get("/get-category", tags=["Category"])
 def get_all(
     db          : Session = Depends(get_db),
     current_user: User    = Depends(AdminPermission),
@@ -62,7 +62,7 @@ def get_all(
         "data"        : paginated_data,
     }
 
-@app.get("/category/{category_id}", tags=["Category"])
+@website.get("/category/{category_id}", tags=["Category"])
 def get_by_id(
     category_id : str,
     db          : Session = Depends(get_db),
@@ -80,7 +80,7 @@ def get_by_id(
     }
 
 
-@app.post("/category-create", tags=["Category"])
+@website.post("/category-create", tags=["Category"])
 def create(
     name        : str                   = Form(...),
     photo       : Optional[UploadFile]  = File(None),
@@ -110,7 +110,7 @@ def create(
     }
 
 
-@app.put("/category-update/{category_id}", tags=["Category"])
+@website.put("/category-update/{category_id}", tags=["Category"])
 def update(
     category_id : str,
     name        : str                   = Form(...),
@@ -143,7 +143,7 @@ def update(
     }
 
 
-@app.delete("/category-delete/{category_id}", tags=["Category"])
+@website.delete("/category-delete/{category_id}", tags=["Category"])
 def delete(
     category_id : str,
     db          : Session = Depends(get_db),

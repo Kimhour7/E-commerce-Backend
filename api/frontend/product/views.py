@@ -6,9 +6,9 @@ from api.category.models import TBL_CATEGORY
 from api.product.models import TBL_PRODUCT
 from core.db import get_db
 from core.photo_maker import build_photo_url
-from main import app
+from main import website
 
-@app.get("/list-product-category", tags=["Frontend"])
+@website.get("/list-product-category", tags=["Frontend"])
 def get_list_product(
     db          : Session = Depends(get_db),
     page        : int     = 1,
@@ -67,7 +67,7 @@ def get_list_product(
         "data"        : paginated_data,
     }
 
-@app.get("/get-list-product-by-category", tags=["Frontend"])
+@website.get("/get-list-product-by-category", tags=["Frontend"])
 def get_list_product(
     db          : Session = Depends(get_db),
     page        : int     = 1,
