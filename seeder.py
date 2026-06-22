@@ -73,11 +73,11 @@ def seed():
         if not branch:
             branch = TBL_BRANCH(
                 id="HQ",
+                company_id = "SYSTEM",
                 name="HQ",
                 name_lc="hq",
                 country_id=country.id,
                 province_id=province.id,
-                is_active=True,
                 created_by="SYSTEM",
                 updated_by="SYSTEM",
             )

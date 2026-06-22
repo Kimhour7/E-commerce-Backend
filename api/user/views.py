@@ -193,14 +193,14 @@ async def _send_otp_email(to_email: str, otp: str) -> None:
         logger.info(f"Attempting to send OTP email to {to_email} via {configs.SMTP_HOST}:{smtp_port}")
 
         use_start_tls = smtp_port == 587
-        use_tls = smtp_port == 465
+        use_tls       = smtp_port == 465
 
         async with aiosmtplib.SMTP(
-            hostname=configs.SMTP_HOST,
-            port=smtp_port,
-            timeout=10,
-            start_tls=use_start_tls,
-            use_tls=use_tls
+            hostname  = configs.SMTP_HOST,
+            port      = smtp_port,
+            timeout   = 10,
+            start_tls = use_start_tls,
+            use_tls   = use_tls
         ) as smtp:
             await smtp.login(configs.SMTP_USERNAME, configs.SMTP_PASSWORD)
             await smtp.send_message(message)

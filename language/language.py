@@ -10,9 +10,16 @@ class Language(enum.Enum):
   kh = "kh"
 
 class LanguageKey:
-  success_message = "success_message"
-  company_create_failed = "company_create_failed"
-  company_update_success = "company_update_success"
-  company_update_failed = "company_update_failed"
-  company_delete_success = "company_delete_success"
-  company_not_found = "company_not_found"
+  create_success  = "create_success"
+  create_failed   = "create_failed"
+  update_success  = "update_success"
+  update_failed   = "update_failed"
+  delete_success  = "delete_success"
+  delete_failed   = "delete_failed"
+  not_found       = "not_found"
+  get_success     = "get_success"
+  get_failed      = "get_failed"
+
+  #Module
+  company = 'company'
+  branch  = 'branch'

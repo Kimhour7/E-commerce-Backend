@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Date, String, Time
+from sqlalchemy import Column, Date, String, Time
 from core.db import CoreAuditModel, Base
 
 class TBL_BRANCH(CoreAuditModel, Base):
@@ -20,4 +20,3 @@ class TBL_BRANCH(CoreAuditModel, Base):
     opening_date = Column(Date)
     open_hours   = Column(Time)
     close_hours  = Column(Time)
-    is_active    = Column(Boolean, default=True)

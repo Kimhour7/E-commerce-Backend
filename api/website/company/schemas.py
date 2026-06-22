@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-# Base Schemas
+# Base Schemas and Create
 class CompanyBase(BaseModel):
     name          : str                = Field(..., max_length=250)
     name_lc       : str                = Field(..., max_length=250)
@@ -22,10 +22,6 @@ class CompanyBase(BaseModel):
     village_id    : Optional[str]      = Field(None, max_length=64)
     street_no     : Optional[str]      = Field(None, max_length=50)
     lat_long      : Optional[str]      = Field(None, max_length=30)
-
-# Create
-class CompanyCreate(CompanyBase):
-    id: Optional[str] = Field(None, max_length=64)
 
 # Update 
 class CompanyUpdate(BaseModel):
@@ -78,8 +74,6 @@ class CompanyResponse(BaseModel):
     street_no     : Optional[str] = None
     lat_long      : Optional[str] = None
     record_status : Optional[str] = None
-    company_id    : Optional[str] = None
-    branch_id     : Optional[str] = None
     created_by    : Optional[str] = None
     updated_by    : Optional[str] = None
     created_at    : Optional[datetime] = None

@@ -1,26 +1,26 @@
 from datetime import datetime
-from fastapi import Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 from api.website.company.models import TBL_COMPANY
-from api.website.company.schemas import CompanyCreate, CompanySingleResponse, CompanyListResponse, CompanyUpdate
+from api.website.company.schemas import CompanyBase, CompanySingleResponse, CompanyListResponse, CompanyUpdate
 from core.db import RecordStatus, get_db
 from core.permission import *
 from core.securerity import User
 from core.custom_id import PrefixId, generate_prefixed_id
 from language.language import Language, LanguageKey, getLang
-from main import website
 
+module_name    = "Company"
+company_router = APIRouter(prefix="/company", tags=[f"{module_name}"])
 
-@website.post("/company-create", tags=["Company"], response_model=CompanySingleResponse)
-def company_create(
-    schemas     : CompanyCreate,
+@company_router.post("/create", response_model=CompanySingleResponse)
+def create(
+    schemas     : CompanyBase,
     db          : Session  = Depends(get_db),
     current_user: User     = Depends(SuperUserPermission),
     language    : Language = Language.en,
 ):
     try:
-
         company = TBL_COMPANY(
             id = generate_prefixed_id(db, TBL_COMPANY, prefix=PrefixId.Company),
 
@@ -37,51 +37,62 @@ def company_create(
 
         return CompanySingleResponse(
             success = True,
-            message = getLang(LanguageKey.success_message, lang=language.value),
+            message = getLang(LanguageKey.create_success, {"param": getLang(LanguageKey.company, lang=language.value)}, language.value),
             data    = company,
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Company Module ${e}")
-        raise HTTPException(status_code=500, detail=getLang(LanguageKey.company_create_failed, lang=language.value))
+        print(f"{module_name} Module : {e}")
+        raise HTTPException(status_code=500, detail=getLang(LanguageKey.create_failed, lang=language.value))
     finally:
         db.close()
 
 
-@website.get("/company-get", tags=["Company"], response_model=CompanyListResponse)
-def company_get(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(SuperUserPermission),
-    page: int = 1,
-    size: int = 10,
-    search: str = None,
-    record_type: RecordStatus = RecordStatus.active,
+@company_router.get("/get", response_model=CompanyListResponse)
+def get(
+    db          : Session      = Depends(get_db),
+    current_user: User         = Depends(SuperUserPermission),
+    page        : int          = 1,
+    size        : int          = 10,
+    search      : str          = None,
+    language    : Language     = Language.en,
+    record_type : RecordStatus = RecordStatus.active,
 ):
-    query = db.query(TBL_COMPANY).filter(TBL_COMPANY.record_status == record_type.value)
+    try:
+        query = db.query(TBL_COMPANY).filter(TBL_COMPANY.record_status == record_type.value)
 
-    if search:
-        query = query.filter(
-            or_(
-                TBL_COMPANY.name.ilike(f"%{search}%"),
-                TBL_COMPANY.id.ilike(f"%{search}%"),
+        if search:
+            query = query.filter(
+                or_(
+                    TBL_COMPANY.name.ilike(f"%{search}%"),
+                    TBL_COMPANY.id.ilike(f"%{search}%"),
+                )
             )
+
+        rows = query.offset((page - 1) * size).limit(size).all()
+        total_count = query.count()
+
+        return CompanyListResponse(
+            success     = True,
+            message     = getLang(LanguageKey.get_success, {"param": getLang(LanguageKey.company, lang=language.value)}, language.value),
+            total       = total_count,
+            page        = page,
+            size        = size,
+            total_pages = (total_count + size - 1) // size if total_count else 0,
+            data        = rows
         )
-
-    rows = query.offset((page - 1) * size).limit(size).all()
-    total_count = query.count()
-
-    return CompanyListResponse(
-        success     = True,
-        message     = "Company retrieved successfully",
-        total       = total_count,
-        page        = page,
-        size        = size,
-        total_pages = (total_count + size - 1) // size if total_count else 0,
-        data        = rows
-    )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"{module_name} Module : {e}")
+        raise HTTPException(status_code=500, detail=getLang(LanguageKey.create_failed, {"param": getLang(LanguageKey.company, lang=language.value)}, language.value),)
+    finally:
+        db.close()
 
 
-@website.get("/company-get/{company_id}", tags=["Company"], response_model=CompanySingleResponse)
-def company_get(
+@company_router.get("/get/{company_id}", response_model=CompanySingleResponse)
+def get_single_record(
     company_id : str,
     db: Session = Depends(get_db),
     current_user: User = Depends(SuperUserPermission),
@@ -96,25 +107,27 @@ def company_get(
             )
 
         if not get_company:
-            return HTTPException(
+            raise HTTPException(
                 status_code=404,
-                detail=getLang(LanguageKey.company_not_found, lang=language.value),
+                detail=getLang(LanguageKey.not_found, {"param" : getLang(LanguageKey.company, lang=language.value)}, lang=language.value),
             )
         
         return CompanySingleResponse(
             success = True,
-            message = getLang(LanguageKey.success_message, lang=language.value),
+            message = getLang(LanguageKey.get_success, {"param": getLang(LanguageKey.company, lang=language.value)}, language.value),
             data    = get_company,
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Company Module ${e}")
-        raise HTTPException(status_code=500, detail=getLang(LanguageKey.company_create_failed, lang=language.value))
+        print(f"{module_name} Module : {e}")
+        raise HTTPException(status_code=500, detail=getLang(LanguageKey.get_failed, {"param": getLang(LanguageKey.company, lang=language.value)}, language.value),)
     finally:
         db.close()
 
 
-@website.put("/company-update/{company_id}", tags=["Company"], response_model=CompanySingleResponse)
-def company_update(
+@company_router.put("/update/{company_id}", response_model=CompanySingleResponse)
+def update(
     company_id  : str,
     schemas     : CompanyUpdate,
     db          : Session = Depends(get_db),
@@ -132,7 +145,7 @@ def company_update(
         if not get_company:
             raise HTTPException(
                 status_code=404,
-                detail=getLang(LanguageKey.company_not_found, lang=language.value),
+                detail=getLang(LanguageKey.not_found, {"param" : getLang(LanguageKey.company, lang=language.value)}, lang=language.value),
             )
 
         update_data = schemas.dict(exclude_unset=True)
@@ -146,22 +159,24 @@ def company_update(
         db.refresh(get_company)
 
         return CompanySingleResponse(
-            success=True,
-            message=getLang(LanguageKey.company_update_success, lang=language.value),
-            data=get_company,
+            success = True,
+            message = getLang(LanguageKey.update_success, {"param": getLang(LanguageKey.company, lang=language.value)}, language.value),
+            data    = get_company,
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Company Module ${e}")
+        print(f"{module_name} Module : {e}")
         raise HTTPException(
             status_code=500,
-            detail=getLang(LanguageKey.company_update_failed, lang=language.value),
+            detail = getLang(LanguageKey.update_failed, {"param": getLang(LanguageKey.company, lang=language.value)}, language.value),
         )
     finally:
         db.close()
 
 
-@website.delete("/company-delete/{company_id}", tags=["Company"])
-def company_delete(
+@company_router.delete("/delete/{company_id}")
+def delete(
     company_id  : str,
     db          : Session = Depends(get_db),
     current_user: User    = Depends(SuperUserPermission),
@@ -176,7 +191,7 @@ def company_delete(
         )
 
         if not get_company:
-            raise HTTPException(status_code=404, detail="Company not found")
+            raise HTTPException(status_code=404, detail=getLang(LanguageKey.not_found, {"param" : getLang(LanguageKey.company, lang=language.value)}, lang=language.value),)
         
         get_company.record_status = RecordStatus.deleted.value
         get_company.updated_by = current_user.username
@@ -186,13 +201,15 @@ def company_delete(
 
         return {
             "success" : True,
-            "message" : "Company retrieved successfully",
+            "message" : getLang(LanguageKey.delete_success, {"param" : getLang(LanguageKey.company, lang=language.value)}, lang=language.value),
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Company Module ${e}")
+        print(f"{module_name} Module : {e}")
         raise HTTPException(
             status_code=500,
-            detail=getLang(LanguageKey.company_update_failed, lang=language.value),
+            detail=getLang(LanguageKey.delete_failed, {"param" : getLang(LanguageKey.company, lang=language.value)}, lang=language.value),
         )
     finally:
         db.close()
