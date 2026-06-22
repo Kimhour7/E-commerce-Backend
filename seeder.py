@@ -78,7 +78,6 @@ def seed():
                 name_lc="hq",
                 country_id=country.id,
                 province_id=province.id,
-                is_active=True,
                 created_by="SYSTEM",
                 updated_by="SYSTEM",
             )
