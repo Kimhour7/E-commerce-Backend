@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from core.db import engine
+from core.db import engine, RecordStatus
 from core.custom_id import generate_prefixed_id, PrefixId
 
 from api.master_data.country.models import TBL_COUNTRY
@@ -98,7 +98,7 @@ def seed():
                 last_name=None,
                 phone=None,
                 user_role="superuser",
-                is_active=True,
+                record_status=RecordStatus.active.value,
                 working_company_id="SYSTEM",
                 working_branch_id="HQ",
                 created_by="SYSTEM",

@@ -4,12 +4,9 @@ from typing    import Callable
 from core.securerity import get_current_user, User
 
 # ============================== Permission Roles ==============================
-
 class Role:
     SUPERUSER = "superuser"
     ADMIN     = "admin"
-    MANAGER   = "manager"
-    Staff     = "staff"
     USER      = "user"
 
 # ============================== Core Permission Checker ==============================
@@ -46,9 +43,6 @@ def require_roles(*allowed_roles: str) -> Callable:
 
 
 # ============================== Shortcut Dependencies ==============================
-
 SuperUserPermission = require_roles(Role.SUPERUSER)
 AdminPermission     = require_roles(Role.SUPERUSER, Role.ADMIN)
-ManagerPermission   = require_roles(Role.SUPERUSER, Role.ADMIN, Role.MANAGER)
-StaffPermission     = require_roles(Role.SUPERUSER, Role.ADMIN, Role.MANAGER, Role.Staff)
-UserPermission      = require_roles(Role.SUPERUSER, Role.ADMIN, Role.MANAGER, Role.Staff, Role.USER)
+UserPermission      = require_roles(Role.SUPERUSER, Role.ADMIN, Role.USER)

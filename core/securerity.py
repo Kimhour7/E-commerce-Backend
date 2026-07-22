@@ -9,7 +9,7 @@ from core.db import get_db
 from config import configs
 from datetime import datetime, timedelta
 
-#================================ Start Hash Password =================================
+#================================ Hash Password =================================
 pwd_context = CryptContext(
     schemes=["argon2"],
     deprecated="auto"
@@ -20,11 +20,10 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
     return pwd_context.hash(password)
-#================================== End Hash Password =================================
 
 
 
-# ============================== Start Current User Block =============================
+# ============================== Current User=============================
 class User(BaseModel):
     id                 : str
     username           : str
@@ -33,7 +32,6 @@ class User(BaseModel):
     email              : str | None = None
     phone              : str | None = None
     user_role          : str | None = None
-    is_active          : bool       = True
     working_company_id : str | None = None
     working_branch_id  : str | None = None
 
@@ -68,19 +66,10 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your account has been deactivated. Please contact an administrator.",
-        )
-
     return user
 
-# ==============================  End Current User Block ==============================
 
-
-# ============================== Start Access Token Block =============================
-
+# ============================== Access Token =============================
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta is None:
@@ -91,4 +80,3 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 def create_refresh_token(data: dict):
     return jwt.encode(data, configs.SECRET_KEY, algorithm=configs.ALGORITHM)
-# =============================== End Access Token Block ==============================

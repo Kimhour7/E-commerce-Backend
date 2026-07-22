@@ -1,103 +1,48 @@
-from pydantic import BaseModel, EmailStr
+from datetime import date, datetime, time
 from typing import Optional, List
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+# Base Schemas and Create
+class UserBase(BaseModel):
+    first_name         : str           = Field(..., max_length=250)
+    last_name          : str           = Field(..., max_length=250)
+    username           : str           = Field(..., max_length=250)
+    password           : str           = Field(..., max_length=250)
+    email              : str           = Field(..., max_length=200)
+    phone              : Optional[str] = Field(None, max_length=150)
+    user_role          : Optional[str] = Field(None, max_length=25)
+    working_company_id : Optional[str] = Field(None, max_length=64)
+    working_branch_id  : Optional[str] = Field(None, max_length=64)
 
-# ============================== Auth Schemas ==============================
+# Update 
+class UserUpdate(BaseModel):
+    first_name         : Optional[str] = Field(None, max_length=250)
+    last_name          : Optional[str] = Field(None, max_length=250)
+    username           : Optional[str] = Field(None, max_length=250)
+    password           : Optional[str] = Field(None, max_length=250)
+    email              : Optional[str] = Field(None, max_length=200)
+    phone              : Optional[str] = Field(None, max_length=150)
+    user_role          : Optional[str] = Field(None, max_length=25)
+    working_company_id : Optional[str] = Field(None, max_length=64)
+    working_branch_id  : Optional[str] = Field(None, max_length=64)
 
-class RegisterRequest(BaseModel):
-    username  : str
-    password  : str
-    email     : EmailStr | None = None
-    first_name: str | None = None
-    last_name : str | None = None
-    phone     : str | None = None
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-class LoginResponse(BaseModel):
-    access_token : str
-    refresh_token: str | None = None
-    token_type   : str
-    expires_in   : int | None = None
-
-class MessageResponse(BaseModel):
-    message: str
-
-
-# ============================== Password Schemas ==============================
-
-class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
-
-class ResetPasswordRequest(BaseModel):
-    email       : EmailStr
-    otp         : str
-    new_password: str
-
-class ChangePasswordRequest(BaseModel):
-    current_password: str
-    new_password    : str
-
-
-# ============================== User Response Schemas ==============================
-
+#Response
 class UserResponse(BaseModel):
-    id                : str
-    username          : str
-    email             : str | None = None
-    first_name        : str | None = None
-    last_name         : str | None = None
-    phone             : str | None = None
-    user_role         : str | None = None
-    is_active         : bool       = True
-    working_company_id: str | None = None
-    working_branch_id : str | None = None
-    created_at        : str | None = None
-    updated_at        : str | None = None
+    first_name         : Optional[str] = Field(None, max_length=250)
+    last_name          : Optional[str] = Field(None, max_length=250)
+    username           : Optional[str] = Field(None, max_length=250)
+    password           : Optional[str] = Field(None, max_length=250)
+    email              : Optional[str] = Field(None, max_length=200)
+    phone              : Optional[str] = Field(None, max_length=150)
+    user_role          : Optional[str] = Field(None, max_length=25)
+    working_company_id : Optional[str] = Field(None, max_length=64)
+    working_branch_id  : Optional[str] = Field(None, max_length=64)
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
-class UserListResponse(BaseModel):
-    success    : bool
-    message    : str
-    total      : int
-    page       : int
-    size       : int
-    total_pages: int
-    data       : List[UserResponse]
+class UserSingleResponse(BaseModel):
+    success : bool
+    message : str
+    data    : Optional[UserResponse] = None
 
-
-# ============================== Self-Update Schema ==============================
-
-class UpdateProfileRequest(BaseModel):
-    email     : EmailStr | None = None
-    first_name: str | None = None
-    last_name : str | None = None
-    phone     : str | None = None
-
-
-# ============================== Admin User Schemas ==============================
-
-class AdminCreateUserRequest(BaseModel):
-    username          : str
-    password          : str
-    email             : EmailStr | None = None
-    first_name        : str | None = None
-    last_name         : str | None = None
-    phone             : str | None = None
-    user_role         : str = "user"
-    working_company_id: str | None = None
-    working_branch_id : str | None = None
-
-class AdminUpdateUserRequest(BaseModel):
-    email             : EmailStr | None = None
-    first_name        : str | None = None
-    last_name         : str | None = None
-    phone             : str | None = None
-    user_role         : str | None = None
-    is_active         : bool | None = None
-    working_company_id: str | None = None
-    working_branch_id : str | None = None
+    model_config = ConfigDict(from_attributes=True)

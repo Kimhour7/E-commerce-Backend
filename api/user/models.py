@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, String
+from sqlalchemy import Column, String
 from core.db import CoreAuditModel, Base
 
 class TBL_USER(CoreAuditModel, Base):
@@ -12,6 +12,5 @@ class TBL_USER(CoreAuditModel, Base):
     last_name          = Column(String(255), nullable=True)
     phone              = Column(String(50), nullable=True)
     user_role          = Column(String(50), default="user", nullable=False)
-    is_active          = Column(Boolean, default=True, nullable=False)
     working_company_id = Column(String(255), nullable=True)
     working_branch_id  = Column(String(255), nullable=True)
