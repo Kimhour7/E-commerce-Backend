@@ -12,3 +12,4 @@ aiosmtplib==5.1.1
 python-jose[cryptography]==3.5.0
 passlib==1.7.4
 argon2-cffi==25.1.0
+cloudinary==1.44.1

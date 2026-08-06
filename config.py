@@ -5,6 +5,10 @@ from pathlib import Path
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
 
+def get_env(name: str, default: str = None) -> str:
+    value = os.getenv(name, default)
+    return value.strip() if isinstance(value, str) else value
+
 class Config:
     #Database Config
     PROJECT_NAME:str = "FastAPI Testing"
@@ -31,5 +35,12 @@ class Config:
     SMTP_PASSWORD      : str = os.getenv("SMTP_PASSWORD")
     SMTP_FROM          : str = os.getenv("SMTP_FROM")
     OTP_EXPIRE_MINUTES : int = int(os.getenv("OTP_EXPIRE_MINUTES"))
+
+    #Cloudinary Config
+    CLOUDINARY_URL       : str = get_env("CLOUDINARY_URL")
+    CLOUDINARY_CLOUD_NAME: str = get_env("CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY   : str = get_env("CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET: str = get_env("CLOUDINARY_API_SECRET")
+    CLOUDINARY_FOLDER    : str = get_env("CLOUDINARY_FOLDER", "delivery")
 
 configs = Config()
