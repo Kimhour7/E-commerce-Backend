@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String
+from sqlalchemy import JSON, Column, String
 from core.db import CoreAuditModel, Base
 
 class TBL_USER(CoreAuditModel, Base):
@@ -14,3 +14,5 @@ class TBL_USER(CoreAuditModel, Base):
     user_role          = Column(String(50), default="user", nullable=False)
     working_company_id = Column(String(255), nullable=True)
     working_branch_id  = Column(String(255), nullable=True)
+    access_company_id  = Column(JSON, nullable=False, default=list)
+    access_branch_id   = Column(JSON, nullable=False, default=list)

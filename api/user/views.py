@@ -44,8 +44,10 @@ def _user_to_response(user: TBL_USER) -> dict:
         "user_role"         : user.user_role,
         "working_company_id": user.working_company_id,
         "working_branch_id" : user.working_branch_id,
-        "created_at"        : str(user.created_at) if user.created_at else None,
-        "updated_at"        : str(user.updated_at) if user.updated_at else None,
+        "access_company_id" : user.access_company_id or [],
+        "access_branch_id"  : user.access_branch_id or [],
+        "created_at"        : user.created_at,
+        "updated_at"        : user.updated_at,
     }
 
 
@@ -96,6 +98,8 @@ def register(
         last_name  = payload.last_name,
         phone      = payload.phone,
         user_role  = "user",
+        access_company_id = [],
+        access_branch_id  = [],
         created_by = username,
         updated_by = username,
     )
@@ -304,7 +308,11 @@ async def reset_password(
     tags=["Profile"],
 )
 async def get_me(current_user = Depends(get_current_user)):
-    return _user_to_response(current_user)
+    return UserSingleResponse(
+        success = True,
+        message = "Current user retrieved successfully",
+        data    = _user_to_response(current_user),
+    )
 
 
 @website.put(
@@ -403,4 +411,8 @@ async def admin_get_user(
     user = db.query(TBL_USER).filter(TBL_USER.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return _user_to_response(user)
+    return UserSingleResponse(
+        success = True,
+        message = "User retrieved successfully",
+        data    = _user_to_response(user),
+    )

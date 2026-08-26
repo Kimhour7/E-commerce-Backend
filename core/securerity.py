@@ -1,5 +1,5 @@
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import Depends, HTTPException, status
 from jose import jwt, JWTError
 from api.user.models import TBL_USER
@@ -34,6 +34,8 @@ class User(BaseModel):
     user_role          : str | None = None
     working_company_id : str | None = None
     working_branch_id  : str | None = None
+    access_company_id  : list[str] = Field(default_factory=list)
+    access_branch_id   : list[str] = Field(default_factory=list)
 
     class Config:
         from_attributes = True

@@ -101,6 +101,8 @@ def seed():
                 record_status=RecordStatus.active.value,
                 working_company_id="SYSTEM",
                 working_branch_id="HQ",
+                access_company_id=["SYSTEM"],
+                access_branch_id=["HQ"],
                 created_by="SYSTEM",
                 updated_by="SYSTEM",
             )
